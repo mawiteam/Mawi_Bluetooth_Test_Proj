@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical">
+
+    <com.example.test.project.widget.GraphPaperView
+        android:layout_width="match_parent"
+        android:layout_height="300dp"
+        android:layout_centerVertical="true"/>
+
+    <com.github.mikephil.charting.charts.LineChart
+        android:id="@+id/ecg_line_chart"
+        android:layout_width="match_parent"
+        android:layout_height="300dp"
+        android:layout_centerVertical="true"/>
+
+    <TextView
+        android:id="@+id/ecg_packets_info"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/ecg_line_chart"
+        android:layout_marginBottom="16dp"
+        android:text="Is attached: false"
+        android:gravity="center"/>
+
+    <TextView
+        android:id="@+id/ecg_heart_rate"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:layout_below="@id/ecg_line_chart"
+        android:text="Heart Rate: --"
+        android:textSize="18sp"
+        android:layout_marginTop="16dp"/>
+
+</RelativeLayout>

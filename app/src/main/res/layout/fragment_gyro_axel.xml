@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <android.support.v7.widget.AppCompatSpinner
+        android:id="@+id/sampling_modes"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:entries="@array/sampling_modes" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="Gyroscope:"
+        android:textSize="16sp" />
+
+    <com.github.mikephil.charting.charts.LineChart
+        android:id="@+id/gyro_line_chart"
+        android:layout_width="match_parent"
+        android:layout_height="200dp" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="Accelerometer:"
+        android:textSize="16sp" />
+
+    <com.github.mikephil.charting.charts.LineChart
+        android:id="@+id/axel_line_chart"
+        android:layout_width="match_parent"
+        android:layout_height="200dp" />
+</LinearLayout>

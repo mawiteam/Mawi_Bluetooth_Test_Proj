@@ -1,0 +1,65 @@
+apply plugin: 'com.android.application'
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-android-extensions'
+
+Properties properties = new Properties()
+properties.load(project.rootProject.file("local.properties").newDataInputStream())
+
+repositories {
+    maven {
+        url "https://mawisolutions.bintray.com/MawiBluetooth"
+        credentials {
+            username properties.getProperty("mawi.username")
+            password properties.getProperty("mawi.apikey")
+        }
+    }
+}
+
+android {
+    def global_configuration = rootProject.extensions.getByName("ext")
+
+    compileSdkVersion global_configuration["compile_sdk"]
+    buildToolsVersion global_configuration["build_tools"]
+
+    defaultConfig {
+        applicationId global_configuration["application_id"]
+        minSdkVersion global_configuration["min_sdk"]
+        targetSdkVersion global_configuration["target_sdk"]
+        versionCode global_configuration["version_code"]
+        versionName global_configuration["version_name"]
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        multiDexEnabled true
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility global_configuration["source_compat"]
+        targetCompatibility global_configuration["target_compat"]
+    }
+}
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    def libs = rootProject.ext.libs
+
+    implementation libs.kotlin
+    implementation libs.app_compat_v7
+    implementation libs.support_design
+    implementation libs.recycler_view
+    implementation libs.anko
+
+    implementation libs.rx_java
+    implementation libs.rx_android
+    implementation libs.charting
+    implementation libs.guava
+    implementation libs.gson
+    implementation libs.mawi_bluetooth
+
+    testImplementation libs.junit
+}
