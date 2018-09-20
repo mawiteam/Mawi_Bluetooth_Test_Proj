@@ -15,7 +15,7 @@ properties.load(project.rootProject.file("local.properties").newDataInputStream(
 
 repositories {
     maven {
-        url  "https://mawisolutions.bintray.com/MawiBluetooth"
+        url  "<URL>"
         credentials {
            username properties.getProperty("mawi.username")
            password properties.getProperty("mawi.apikey")
@@ -318,7 +318,7 @@ client.fitService().writeGoals(fitGoals)
 client.fitService().readFitInfo()
     .subscribe(
         fitInfo -> {
-            // handle delivered fit info
+            // handle  fit info
         },
         throwable -> {
             // handle error there
@@ -330,7 +330,7 @@ You can observe changes of `FitInfo` by using snippet bellow (temporary, for som
 Disposable fitInfoSubscription = client.fitService().observeFitInfo()
     .subscribe(
         fitInfo -> {
-            // handle delivered fit info
+            // handle received fit info
         },
         throwable -> {
             // handle error there
@@ -346,7 +346,7 @@ To get the initial `FitInfo` and then observe changes you can use:
 Disposable fitInfoSubscription = Observable.merge(client.fitService().readFitInfo(), client.fitService().observeFitInfo())
     .subscribe(
         fitInfo -> {
-            // handle delivered fit info
+            // handle received fit info
         },
         throwable -> {
             // handle error there
@@ -354,12 +354,13 @@ Disposable fitInfoSubscription = Observable.merge(client.fitService().readFitInf
     );
 
 ...
+
 fitInfoSubscription.dispose();
 ```
 
-#### Activity history request
-According above snippet, after calling `client.fitService().readFitInfo()` you deliver `FitInfo` that provides fit records count.
-For example, you are delivered
+#### Activity history request/response
+According above snippet, after calling `client.fitService().readFitInfo()` you receive `FitInfo` that provides fit records count.
+For example, you have received
 ```json
 {"recordsCount":1500}
 ```
@@ -377,26 +378,50 @@ for (int i = 0; i < count; i++) {
     deque.add(15);
 }
 
+// this is necessary when the count is not an integer
 int diff = fitInfo.recordsCount - count * 15;
 deque.add(diff);
 
 ...
-
 ```
 
-*Why do we divide by `15`:*
-_According device API max count of delivered activity history records are within range [1..15]_
+>***Why do we divide by `15`:***
+>According to the device's API, the maximum number of records that can be received at the time should be in the range `[1..15]`.
 
-
-After above operations you need to create _header_.
+Before sending request, you need to subscribe for `FitResponse` updates.
 ```java
-int recordsCount = 15;
-int startId = 0;
+Disposable fitRequestSubscription = client.fitService().observeActivityHistory()
+    .subscribeOn(Schedulers.io())
+    .observeOn(AndroidSchedulers.mainThread())
+    .subscribe(
+        fitResponse -> {
+            // do whatever you want like save to db etc.
+            // you can check result code
+            // here you can make a request for the next piece of data
+        },
+        throwable -> {
+            // handle error there
+        }
+    );
+
+...
+
+// When done, just dispose
+fitRequestSubscription.dispose();
+```
+
+After above operations you need to create _header_ and just send to the device.
+```java
+...
+
+// initial values
+int recordsCount = deque[0]; // allowed value in range [1..15]
+int startId = 0; // id of the first record in the sequence, last id available is equal fitInfo.recordsCount - 1
+
+...
+
 FitRecordHeader header = new FitRecordHeader(recordsCount, startId);
-```
 
-Having it you can make request for deliver activity history.
-```java
 client.fitService().requestActivityHistory(header)
     .subscribe(
         () -> {
@@ -406,5 +431,93 @@ client.fitService().requestActivityHistory(header)
             // handle error there
         }
     );
+
+...
 ```
 
+#### Fit state
+This part of the Fit Service returns the daytime activity, such as how many steps you have gone, the calories spent, what distance you have passed, and how much active time was for the day.
+You can both read and observe activity.
+```java
+// For read
+client.fitService().readFitState()
+    .subscribe(
+        fitState -> {
+            // do whatever you want
+        },
+        throwable -> {
+            // handle error there
+        }
+    );
+
+// For observe
+Disposable fitStateSubscription = client.fitService().observeFitState()
+    .subscribeOn(Schedulers.io())
+    .observeOn(AndroidSchedulers.mainThread())
+    .subscribe(
+        fitState -> {
+            // whatewer you want
+        },
+        throwable -> {
+            // handle error there
+        }
+    );
+
+// When done, just dispose
+fitStateSubscription.dispose();
+```
+
+But you can also get the initial `FitState` and then observe changes you can use:
+```java
+Disposable fitStateSubscription = Observable.merge(client.fitService().readFitState(), client.fitService().observeFitState())
+    .subscribeOn(Schedulers.io())
+    .observeOn(AndroidSchedulers.mainThread())
+    .subscribe(
+        fitState -> {
+            // whatewer you want
+        },
+        throwable -> {
+            // handle error there
+        }
+    );
+
+// When done, just dispose
+fitStateSubscription.dispose();
+```
+
+#### Body Metrics
+An important part of the Fit Service, as the calculations of the remaining indicators are based on data that are presented by `FitBodyMetrics`.
+
+The following are the parameters and their types:
+*   ***`sex` - 0 (other), 1 (male), 2 (female);***
+*   ***`age` - are presented in years;***
+*   ***`height` - are presented in cm;***
+*   ***`weight` - are presented in kg;***
+*   ***`avgStep` - are presented in cm (NB new experimental optional feature);***
+
+For read/write use following snippets:
+```java
+// For write
+FitBodyMetrics bodyMetrics = new FitBodyMetrics(1, 30, 165, 65, 60); // male, 30 years, 165 cm, 65 kg, 60 cm
+
+client.fitService().writeBodyMetrics(bodyMetrics)
+    .subscribe(
+        () -> {
+           // do whatever you want
+        },
+        throwable -> {
+            // handle error there
+        }
+    );
+
+// For read
+client.fitService().readBodyMetrics()
+    .subscribe(
+        bodyMetrics -> {
+            // do whatever you want
+        },
+        throwable -> {
+            // handle error there
+        }
+    );
+```
