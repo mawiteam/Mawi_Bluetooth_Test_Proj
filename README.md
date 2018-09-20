@@ -15,7 +15,7 @@ properties.load(project.rootProject.file("local.properties").newDataInputStream(
 
 repositories {
     maven {
-        url  "https://mawisolutions.bintray.com/MawiBluetooth"
+        url  
         credentials {
            username properties.getProperty("mawi.username")
            password properties.getProperty("mawi.apikey")
