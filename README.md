@@ -521,3 +521,122 @@ client.fitService().readBodyMetrics()
         }
     );
 ```
+
+### Update firmware service
+#### Usage
+Extend the `BaseUpdateFirmwareService` in your project and implement the protected Class<? extends Activity> getNotificationTarget() method. This method should return an activity class that will be open when you press the DFU notification while transferring the firmware. This activity will be started with the 'Intent.FLAG_ACTIVITY_NEW_TASK' flag.
+```java
+package your.package.name;
+
+import band.mawi.android.bluetooth.service.BaseUpdateFirmwareService;
+import android.app.Activity;
+
+public class UpdateService extends BaseUpdateFirmwareService {
+
+    @Override
+    protected Class<? extends Activity> getNotificationTarget() {
+        /*
+         * As a target activity the NotificationActivity is returned, not the MainActivity. This is because
+         * the notification must create a new task:
+         *
+         * intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+         *
+         * when you press it. You can use NotificationActivity to check whether the new activity
+         * is a root activity (that means no other activity was open earlier) or that some
+         * other activity is already open. In the latter case the NotificationActivity will just be
+         * closed. The system will restore the previous activity. However, if the application has been
+         * closed during upload and you click the notification, a NotificationActivity will
+         * be launched as a root activity. It will create and start the main activity and
+         * terminate itself.
+         *
+         * This method may be used to restore the target activity in case the application
+         * was closed or is open. It may also be used to recreate an activity history using
+         * startActivities(...).
+         */
+         return NotificationActivity.class;
+    }
+}
+```
+
+Remember to add your service to _AndroidManifest.xml_.
+
+You may use the following class in order to prevent starting another instance of your application:
+```java
+package your.package.name;
+
+import your.package.name.MainActivity;
+import android.app.Activity;
+import android.content.Intent;
+import android.os.Bundle;
+
+public class NotificationActivity extends Activity {
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        // If this activity is the root activity of the task, the app is not running
+        if (isTaskRoot()) {
+            // Start the app before finishing
+            final Intent intent = new Intent(this, MainActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            intent.putExtras(getIntent().getExtras()); // copy all extras
+            startActivity(intent);
+        }
+
+        // Now finish, which will drop you to the activity at which you were at the top of the task stack
+        finish();
+    }
+}
+```
+
+To start the update firmware service use following code:
+```java
+// fileStreamUri - the URI of the zip-file
+// filePath - the path of the zip-file
+client.updateFirmwareService(UpdateService.class, macAddress, fileStreamUri, filePath);
+```
+
+If you want to receive notifications about progress of update you can implement the `UpdateFirmwareProgressListener`:
+```java
+...
+
+private final UpdateFirmwareProgressListener listener = new UpdateFirmwareProgressListener() {
+
+    @Override
+    public void onProgressChanged(@Nullable String deviceAddress, int percent, float speed, float avgSpeed, int currentPart, int totalParts) {
+        mProgressBar.setProgress(percent);
+        mTextPercentage.setText(percent + "%");
+    }
+
+    @Override
+    public void onDeviceConnecting(@Nullable String deviceAddress) {
+        mProgressBar.setIndeterminate(true);
+        mTextPercentage.setText(R.string.status_connecting);
+    }
+
+    @Override
+    public void onProcessStarted(@Nullable String deviceAddress) {
+        mProgressBar.setIndeterminate(false);
+        mProgressBar.setProgress(0);
+        mTextPercentage.setText(0 + "%");
+    }
+
+    ...
+};
+
+...
+
+@Override
+protected void onResume() {
+    super.onResume();
+    client.updateFirmwareService().registerProgressListener(listener);
+}
+
+...
+
+@Override
+protected void onPause() {
+    super.onPause();
+    client.updateFirmwareService().unregisterProgressListener();
+}
+```
