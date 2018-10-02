@@ -42,7 +42,7 @@ dependencies {
     implementation "io.reactivex.rxjava2:rxjava:2.2.2"
     implementation "io.reactivex.rxjava2:rxandroid:2.1.0"
 
-    implementation 'band.mawi.android:bluetooth:1.0.0'
+    implementation 'band.mawi.android:bluetooth:1.1.9'
     ...
 }
 ```
