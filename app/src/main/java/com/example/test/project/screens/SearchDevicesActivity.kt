@@ -4,12 +4,11 @@ import android.annotation.SuppressLint
 import android.os.Bundle
 import android.support.v7.widget.LinearLayoutManager
 import android.util.Log
+import band.mawi.android.bluetooth.model.ConnectionState
 import band.mawi.android.bluetooth.repository.ConnectivityListener
 import com.example.test.project.adapter.DevicesAdapter
 import com.example.test.project.toMainThread
 import com.example.test.project.R
-import com.polidea.rxandroidble2.RxBleConnection
-import com.polidea.rxandroidble2.RxBleConnection.RxBleConnectionState.*
 import com.polidea.rxandroidble2.scan.ScanResult
 import io.reactivex.subjects.PublishSubject
 import kotlinx.android.synthetic.main.activity_search_devices.*
@@ -62,22 +61,25 @@ class SearchDevicesActivity : BaseActivity(), DevicesAdapter.OnDeviceClickListen
         .subscribe({ switchResult(it) }, { it.onError() })
   }
 
-  private fun switchResult(it: RxBleConnection.RxBleConnectionState?) {
+  private fun switchResult(it: ConnectionState?) {
     when (it) {
-      CONNECTED -> {
+      ConnectionState.CONNECTED -> {
         hideDialog()
         startActivity<MainActivity>()
         finish()
       }
-      CONNECTING -> {
+      ConnectionState.CONNECTING -> {
         showDialog()
       }
-      DISCONNECTED -> {
+      ConnectionState.DISCONNECTED -> {
         hideDialog()
       }
-      DISCONNECTING -> {
+      ConnectionState.DISCONNECTING -> {
         connectionChangesTrigger.onNext(true)
         hideDialog()
+      }
+      else -> {
+        // null
       }
     }
   }

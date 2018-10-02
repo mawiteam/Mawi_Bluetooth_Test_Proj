@@ -2,6 +2,7 @@ package com.example.test.project.screens.main
 
 import android.annotation.SuppressLint
 import android.util.Log
+import band.mawi.android.bluetooth.helpers.DefaultConfig
 import band.mawi.android.bluetooth.model.BandLocation
 import band.mawi.android.bluetooth.model.fit.FitInfo
 import band.mawi.android.bluetooth.model.fit.FitRecordHeader
@@ -43,7 +44,7 @@ class MainScreenPresenter(private val client: MawiBluetoothClient) : MainScreenC
   private val fitRequestSubject = BehaviorSubject.create<FitRecordHeader>()
 
   private val counts = ArrayDeque<Int>()
-  private var startId = 0
+  private var startId = 1000
 
   override fun attachView(view: MainScreenContract.View) {
     this.view = view
@@ -94,7 +95,7 @@ class MainScreenPresenter(private val client: MawiBluetoothClient) : MainScreenC
             it?.records?.let { view?.onRecordsLoaded(it) }
 //            if (counts.isNotEmpty()) {
 //              val count = counts.pop()
-//              startId += if (counts.size == 0) Math.abs(15 - count) + count
+//              startId += if (counts.size == 0) Math.abs(MAX_FIT_RECORDS_BATCH_SIZE - count) + count
 //              else count
 //              fitRequestSubject.onNext(FitRecordHeader(count, startId))
 //            }
@@ -152,6 +153,8 @@ class MainScreenPresenter(private val client: MawiBluetoothClient) : MainScreenC
   private fun loadHistory(fitInfo: FitInfo) {
     generateDeque(fitInfo)
     fitRequestSubject.onNext(FitRecordHeader(counts.last, fitInfo.recordsCount - 1 - counts.last))
+
+//    fitRequestSubject.onNext(FitRecordHeader(DefaultConfig.MAX_FIT_RECORDS_BATCH_SIZE, startId))
   }
 
   override fun setSamplingMode(index: Int) {
@@ -181,9 +184,9 @@ class MainScreenPresenter(private val client: MawiBluetoothClient) : MainScreenC
 
   private fun generateDeque(fitInfo: FitInfo) {
     counts.clear()
-    val count = fitInfo.recordsCount / 15
-    counts.addAll((0 until count).map { 15 })
-    val diff = fitInfo.recordsCount - count * 15
+    val count = fitInfo.recordsCount / DefaultConfig.MAX_FIT_RECORDS_BATCH_SIZE
+    counts.addAll((0 until count).map { DefaultConfig.MAX_FIT_RECORDS_BATCH_SIZE })
+    val diff = fitInfo.recordsCount - count * DefaultConfig.MAX_FIT_RECORDS_BATCH_SIZE
     counts.add(diff)
     Log.d(TAG, "count=${counts.size}")
   }

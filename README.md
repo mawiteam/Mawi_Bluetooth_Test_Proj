@@ -2,12 +2,18 @@
 
 This library based on RxJava2.X.
 
-## Usage
-### Download
+## Description
+
+This project uses Mawi Solutions Bluetooth SDK. Before using project contact us via [web-site](https://mawi.band/) to get credentials for SDK access
+
+
+## Installation
+
+### 1. Download
 
 First of all, you need to add following lines in your _app_ `build.gradle`.
 
-```grovy
+```groovy
 apply plugin: 'com.android.application'
 
 Properties properties = new Properties()
@@ -51,15 +57,7 @@ mawi.apikey=<YOUR_API_KEY>
 ...
 ```
 
-### Obtaining the client
-
-It's your job to maintain single instance of the client. You can use singleton, scoped [Dagger](http://google.github.io/dagger/) component or whatever else you want.
-
-```java
-MawiBluetoothClient client = MawiBluetoothClient.initialize(context);
-```
-
-### Permissions
+### 2. Permissions
 ```xml
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
@@ -67,7 +65,51 @@ MawiBluetoothClient client = MawiBluetoothClient.initialize(context);
 
 If you are using SDK 23+ you need to enable this permissions manually (you can use [RxPermissions](https://github.com/tbruyelle/RxPermissions) or whatever else you want).
 
-### Turning bluetooth on
+For more information about why you should use this permissions check official [documentation](https://developer.android.com/about/versions/marshmallow/android-6.0-changes#behavior-hardware-id).
+
+### 3. Obtaining the client
+
+It's your job to maintain single instance of the client. You can use singleton, scoped [Dagger](http://google.github.io/dagger/) component or whatever else you want.
+
+```java
+MawiBluetoothClient client = MawiBluetoothClient.initialize(context);
+```
+
+### 4. Start Current Time Service
+After client obtaining you need to start Current Time Service (CTS) for sync date-time with your peripheral. When the peripheral are connected it must automatically synchronize the time.
+
+To start the server use following snippet
+```java
+client.timeService().startService();
+```
+
+For receiving notifications about CTS status you need to subscribe on their events
+```java
+...
+private TimeServiceActionListener listener = new TimeServiceActionListener() {
+    @Override
+    public void onGattServerStart() {
+
+    }
+
+    @Override
+    public void onGattServerStop() {
+    }
+
+   ...
+};
+
+...
+client.timeService().setOnTimeServiceActionListener(listener);
+```
+
+To stop this service
+```java
+client.timeService().stopService();
+```
+
+## Usage
+### 1. Turning bluetooth on
 
 The library does _NOT_ handle managing the state of the BluetoothAdapter.
 <br>Direct managing of the state is not recommended as it violates the application user's right to manage the state of their phone. See `Javadoc` of [BluetoothAdapter.enable()](https://developer.android.com/reference/android/bluetooth/BluetoothAdapter.html#enable()) method.
@@ -78,7 +120,7 @@ Intent intent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
 startActivityForResult(intent, ENABLE_BLUETOOTH_REQUEST);
 ```
 
-### Search devices
+### 2. Search devices
 ```java
 Disposable scanSubscription = client.scanDevices()
     .subscribe(
@@ -94,7 +136,7 @@ Disposable scanSubscription = client.scanDevices()
 scanSubscription.dispose();
 ```
 
-### Observing client state
+### 3. Observing client state
 On Android it is not always trivial to determine if a particular BLE operation has a potential to succeed. i.e. to scan on Android 6.0 the device needs to have a `BluetoothAdapter`, the application needs to have a granted permission to use either `ACCESS_COARSE_LOCATION` or `ACCESS_FINE_LOCATION` and `Location Services` needs to be turned on.
 To be sure that the scan will work only when everything is ready you could use:
 ```java
@@ -127,29 +169,29 @@ Disposable stateChangesSubscription = client.observeStateChanges()
 stateChangesSubscription.dispose();
 ```
 
-### Connect
+### 4. Connection
 For further interactions with Mawi Band the connection is required.
 ```java
 client.connect(macAddress);
 ```
 
-### Observing connection state
+### 5. Observing connection state
 Before connection establishment you need to subscribe for connection _state_ changes with device
 ```java
 Disposable connectionStatesSuscription = client.observeConnectionChanges()
     .subscribe(
         connectionState -> {
             switch(connectionState) {
-                case RxBleConnectionState.CONNECTING:
+                case ConnectionState.CONNECTING:
                     // do something
                     break;
-                case RxBleConnectionState.CONNECTED:
+                case ConnectionState.CONNECTED:
                     // do something
                     break;
-                case RxBleConnectionState.DISCONNECTED:
+                case ConnectionState.DISCONNECTED:
                     // do something
                     break;
-                 case RxBleConnectionState.DISCONNECTING:
+                 case ConnectionState.DISCONNECTING:
                     // do something
                     break;
             }
@@ -160,13 +202,17 @@ Disposable connectionStatesSuscription = client.observeConnectionChanges()
 connectionStatesSuscription.dispose();
 ```
 
-### Disconnect
+### 6. Disconnect
 When you need to disconnect from device use following snippet:
 ```java
 client.disconnect();
 ```
 
+## Interaction
+This section describes available services on band and code for interaction with them.
+
 ### Device Manager
+
 #### Device information
 For getting device information like device name, MAC-address, current firmware and hardware revision, model number and manufacturer you can use following snippet:
 ```java
@@ -181,6 +227,7 @@ client.deviceManager().readDeviceInformation()
     );
 ```
 #### Battery level
+You can both read and observe battery level. To get the initial battery level and then observe changes you can use:
 ```java
 Disposable batterySubscription = Observable.merge(client.deviceManager().readBatteryLevel(), client.deviceManager.observeBatteryLevel())
     .subscribe(
@@ -198,8 +245,16 @@ batterySubscription.dispose();
 
 #### Band location
 You can read and write band location.
+
+>_NOTE: This is an important feature because it determines your ECG whether inverted or not._
+
+BandLocation states:
+
+*   ***`BandLocation.LEFT_HAND` - set if you wearing band on left hand;***
+*   ***`BandLocation.RIGHT_HAND` - set if you wearing band on right hand***
+
 ```java
-// read
+// Read
 client.deviceManager().readBandLocation()
     .subscribe(
         bandLocation -> {
@@ -210,8 +265,8 @@ client.deviceManager().readBandLocation()
         }
     );
 
-// write
-client.deviceManager().setBandLocation(BandLocation.LEFT_HAND)
+// Write
+client.deviceManager().setBandLocation(BandLocation.LEFT_HAND) // or BandLocation.RIGHT_HAND
     .subscribe(
        () -> {
             // band-location successfully set
@@ -293,7 +348,7 @@ client.fitService().readGoals()
 
 // Write
 
-int steps = 8000; // steps
+int steps = DefaultValues.DEF_DAILY_STEPS_GOAL; // steps
 int distance = 4000; // in meters ~ 4 km
 int calories = 4000; // in calories ~ 4 kcal
 int activeTime = 120; // in minutes ~ 2 hours
@@ -360,12 +415,12 @@ fitInfoSubscription.dispose();
 
 #### Activity history request/response
 According above snippet, after calling `client.fitService().readFitInfo()` you receive `FitInfo` that provides fit records count.
-For example, you have received
+For example, you have received:
 ```json
 {"recordsCount":1500}
 ```
 
-Based on this data you can split it on `100` parts, in other words `1500 / 15 = 100` (_reasons of it will be explained bellow_).
+Based on this data you can split it on `100` parts, in other words `1500 / DefaultConfig.MAX_FIT_RECORDS_BATCH_SIZE = 100` (_for more information about `DefaultConfig.MAX_FIT_RECORDS_BATCH_SIZE` see documentation_).
 ```java
 ...
 
@@ -373,20 +428,17 @@ Deque<Integer> deque = new ArrayDeque<>();
 
 ...
 
-int count = fitInfo.recordsCount / 15;
+int count = fitInfo.recordsCount / DefaultConfig.MAX_FIT_RECORDS_BATCH_SIZE;
 for (int i = 0; i < count; i++) {
-    deque.add(15);
+    deque.add(DefaultConfig.MAX_FIT_RECORDS_BATCH_SIZE);
 }
 
 // this is necessary when the count is not an integer
-int diff = fitInfo.recordsCount - count * 15;
+int diff = fitInfo.recordsCount - count * DefaultConfig.MAX_FIT_RECORDS_BATCH_SIZE;
 deque.add(diff);
 
 ...
 ```
-
->***Why do we divide by `15`:***
->According to the device's API, the maximum number of records that can be received at the time should be in the range `[1..15]`.
 
 Before sending request, you need to subscribe for `FitResponse` updates.
 ```java
@@ -489,16 +541,24 @@ fitStateSubscription.dispose();
 An important part of the Fit Service, as the calculations of the remaining indicators are based on data that are presented by `FitBodyMetrics`.
 
 The following are the parameters and their types:
-*   ***`sex` - 0 (other), 1 (male), 2 (female);***
+*   ***`sex` - are presented in Sex.OTHER, Sex.MALE, Sex.FEMALE;***
 *   ***`age` - are presented in years;***
 *   ***`height` - are presented in cm;***
 *   ***`weight` - are presented in kg;***
 *   ***`avgStep` - are presented in cm (NB new experimental optional feature);***
 
+You may use default values for each parameter:
+*   ***`DefaultConfig.DEFAULT_AGE` - described as 30 years old;***
+*   ***`DefaultConfig.DEFAULT_HEIGHT` - described as 170 cm;***
+*   ***`DefaultConfig.DEFAULT_WEIGHT` - described as 70 kg;***
+*   ***`DefaultConfig.DEFAULT_MALE_AVERAGE_STEP_LENGTH` - described as 76 cm for male gender;***
+*   ***`DefaultConfig.DEFAULT_FEMALE_AVERAGE_STEP_LENGTH` - described as 67 cm for female gender;***
+*   ***`DefaultConfig.DEFAULT_AVERAGE_STEP_LENGTH` - described as 72 cm for others;***
+
 For read/write use following snippets:
 ```java
 // For write
-FitBodyMetrics bodyMetrics = new FitBodyMetrics(1, 30, 165, 65, 60); // male, 30 years, 165 cm, 65 kg, 60 cm
+FitBodyMetrics bodyMetrics = new FitBodyMetrics(Sex.MALE, DefaultConfig.DEFAULT_AGE, DefaultConfig.DEFAULT_HEIGHT, DefaultConfig.DEFAULT_WEIGHT, DefaultConfig.DEFAULT_MALE_AVERAGE_STEP_LENGTH);
 
 client.fitService().writeBodyMetrics(bodyMetrics)
     .subscribe(
@@ -522,8 +582,9 @@ client.fitService().readBodyMetrics()
     );
 ```
 
-### Update firmware service
-#### Usage
+### Update firmware service (Over-the-air update)
+
+#### Describe the Service
 Extend the `BaseUpdateFirmwareService` in your project and implement the protected Class<? extends Activity> getNotificationTarget() method. This method should return an activity class that will be open when you press the DFU notification while transferring the firmware. This activity will be started with the 'Intent.FLAG_ACTIVITY_NEW_TASK' flag.
 ```java
 package your.package.name;
@@ -535,7 +596,7 @@ public class UpdateService extends BaseUpdateFirmwareService {
 
     @Override
     protected Class<? extends Activity> getNotificationTarget() {
-        /*
+       /**
          * As a target activity the NotificationActivity is returned, not the MainActivity. This is because
          * the notification must create a new task:
          *
@@ -559,6 +620,8 @@ public class UpdateService extends BaseUpdateFirmwareService {
 ```
 
 Remember to add your service to _AndroidManifest.xml_.
+
+#### Add target Activity
 
 You may use the following class in order to prevent starting another instance of your application:
 ```java
@@ -589,12 +652,17 @@ public class NotificationActivity extends Activity {
 }
 ```
 
+#### Start update
+
 To start the update firmware service use following code:
 ```java
 // fileStreamUri - the URI of the zip-file
 // filePath - the path of the zip-file
 client.updateFirmwareService(UpdateService.class, macAddress, fileStreamUri, filePath);
 ```
+
+
+#### Receive notifications about update progress
 
 If you want to receive notifications about progress of update you can implement the `UpdateFirmwareProgressListener`:
 ```java

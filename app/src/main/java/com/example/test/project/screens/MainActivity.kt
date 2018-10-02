@@ -8,6 +8,7 @@ import android.util.Log
 import android.view.MenuItem
 import band.mawi.android.bluetooth.model.BandLocation
 import band.mawi.android.bluetooth.model.Battery
+import band.mawi.android.bluetooth.model.ConnectionState
 import band.mawi.android.bluetooth.model.Device
 import band.mawi.android.bluetooth.model.fit.FitInfo
 import band.mawi.android.bluetooth.model.fit.FitRecord
@@ -25,7 +26,6 @@ import com.example.test.project.screens.main.MainScreenContract
 import com.example.test.project.screens.main.MainScreenPresenter
 import com.example.test.project.R
 import com.example.test.project.toMainThread
-import com.polidea.rxandroidble2.RxBleConnection.RxBleConnectionState.DISCONNECTED
 import kotlinx.android.synthetic.main.activity_main.*
 import org.jetbrains.anko.getStackTraceString
 import org.jetbrains.anko.startActivity
@@ -68,7 +68,7 @@ class MainActivity : BaseActivity(), OnNavigationItemSelectedListener, OnNavigat
     presenter.onStartHeart()
 
     bluetoothClient.observeConnectionChanges()
-        ?.filter { it == DISCONNECTED }
+        ?.filter { it == ConnectionState.DISCONNECTED }
         ?.take(1)
         ?.toMainThread()
         ?.subscribe({
