@@ -4,7 +4,7 @@ This library based on RxJava2.X.
 
 ## Description
 
-This project uses Mawi Solutions Bluetooth SDK. Before using project contact us via [web-site](https://mawi.band/) to get credentials for SDK access
+This project uses Mawi Solutions Bluetooth SDK. Before using project contact us via [web-site](https://research.mawi.band/) to get credentials for SDK access
 
 
 ## Installation
