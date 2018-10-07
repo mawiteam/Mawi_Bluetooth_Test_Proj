@@ -6,6 +6,9 @@ Properties properties = new Properties()
 properties.load(project.rootProject.file("local.properties").newDataInputStream())
 
 repositories {
+    flatDir {
+        dirs 'libs'
+    }
     maven {
         url properties.getProperty("mawi.url")
         credentials {
@@ -48,6 +51,8 @@ dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     def libs = rootProject.ext.libs
 
+    implementation 'com.android.support:multidex:1.0.3'
+
     implementation libs.kotlin
     implementation libs.app_compat_v7
     implementation libs.support_design
@@ -59,7 +64,14 @@ dependencies {
     implementation libs.charting
     implementation libs.guava
     implementation libs.gson
-    implementation libs.mawi_bluetooth
+
+    implementation libs.rx_ble
+    implementation libs.dfu_lib
+    implementation 'com.jakewharton.rx2:replaying-share:2.0.1'
+
+//    implementation libs.mawi_bluetooth
+
+    implementation(name: 'mawi-bluetooth', ext: 'aar')
 
     testImplementation libs.junit
 }

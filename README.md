@@ -42,7 +42,7 @@ dependencies {
     implementation "io.reactivex.rxjava2:rxjava:2.2.2"
     implementation "io.reactivex.rxjava2:rxandroid:2.1.0"
 
-    implementation 'band.mawi.android:bluetooth:1.0.0'
+    implementation 'band.mawi.android:bluetooth:1.2.0'
     ...
 }
 ```
@@ -56,6 +56,14 @@ mawi.apikey=<YOUR_API_KEY>
 
 ...
 ```
+
+>### *Important!*
+If you got this message:
+```
+Failed to resolve: band.mawi.android:bluetooth:1.2.0
+```
+
+You need to download _mawi-bluetooth.aar_ and place this file in _libs_ folder of your _app_ module.
 
 ### 2. Permissions
 ```xml

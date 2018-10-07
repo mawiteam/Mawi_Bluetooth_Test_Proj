@@ -9,7 +9,7 @@ import band.mawi.android.bluetooth.repository.ConnectivityListener
 import com.example.test.project.adapter.DevicesAdapter
 import com.example.test.project.toMainThread
 import com.example.test.project.R
-import com.polidea.rxandroidble2.scan.ScanResult
+import band.mawi.android.bluetooth.model.ScanResult
 import io.reactivex.subjects.PublishSubject
 import kotlinx.android.synthetic.main.activity_search_devices.*
 import org.jetbrains.anko.getStackTraceString
@@ -104,7 +104,7 @@ class SearchDevicesActivity : BaseActivity(), DevicesAdapter.OnDeviceClickListen
   @SuppressLint("CheckResult")
   override fun onDeviceClick(scanResult: ScanResult) {
     scanTrigger.onNext(true)
-    bluetoothClient.connect(scanResult.bleDevice.macAddress)
+    bluetoothClient.connect(scanResult.bluetoothDevice.address)
     connectionChangesSubject.onNext(true)
   }
 }

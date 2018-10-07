@@ -3,8 +3,8 @@ package com.example.test.project.adapter
 import android.app.Activity
 import android.support.v7.widget.RecyclerView
 import android.view.ViewGroup
+import band.mawi.android.bluetooth.model.ScanResult
 import com.example.test.project.widget.DeviceItemView
-import com.polidea.rxandroidble2.scan.ScanResult
 import org.jetbrains.anko.sdk25.coroutines.onClick
 
 class DevicesAdapter(val activity: Activity?) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
@@ -13,7 +13,7 @@ class DevicesAdapter(val activity: Activity?) : RecyclerView.Adapter<RecyclerVie
 
   fun add(item: ScanResult) {
     list.forEachIndexed { index, scanResult ->
-      if (scanResult.bleDevice.macAddress == item.bleDevice.macAddress) {
+      if (scanResult.bluetoothDevice.address == item.bluetoothDevice.address) {
         list[index] = item
         notifyItemChanged(index)
         return

@@ -7,7 +7,7 @@ import android.util.AttributeSet
 import android.view.View
 import android.widget.FrameLayout
 import com.example.test.project.R
-import com.polidea.rxandroidble2.scan.ScanResult
+import band.mawi.android.bluetooth.model.ScanResult
 import kotlinx.android.synthetic.main.view_device_item.view.*
 
 class DeviceItemView : FrameLayout {
@@ -20,8 +20,8 @@ class DeviceItemView : FrameLayout {
 
   @SuppressLint("SetTextI18n")
   fun setData(scanResult: ScanResult) {
-    device_item_name.text = "${scanResult.bleDevice.name} (rssi=${scanResult.rssi}dBm)"
-    device_item_mac_address.text = "${scanResult.bleDevice.macAddress} (${getBondState(scanResult.bleDevice.bluetoothDevice.bondState)})"
+    device_item_name.text = "${scanResult.bluetoothDevice.name} (rssi=${scanResult.rssi}dBm)"
+    device_item_mac_address.text = "${scanResult.bluetoothDevice.address} (${getBondState(scanResult.bluetoothDevice.bondState)})"
   }
 
   private fun getBondState(state: Int) = if (BluetoothDevice.BOND_BONDED == state) "BONDED" else "NOT BONDED"
