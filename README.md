@@ -57,13 +57,51 @@ mawi.apikey=<YOUR_API_KEY>
 ...
 ```
 
->### *Important!*
+### *Important!*
+
 If you got this message:
+
 ```
 Failed to resolve: band.mawi.android:bluetooth:1.2.0
 ```
 
-You need to download _mawi-bluetooth.aar_ and place this file in _libs_ folder of your _app_ module.
+You need to download [`mawi-bluetooth.aar`](https://github.com/mawiteam/Mawi_Bluetooth_Test_Proj/raw/master/app/libs/mawi-bluetooth.aar) and place this file in _libs_ folder of your _app_ module.
+Then add following lines to your application level `build.gradle`
+
+```groovy
+apply plugin: 'com.android.application'
+
+...
+
+repositories {
+     flatDir {
+        dirs 'libs'
+     }
+
+     ...
+}
+
+android {
+    ...
+}
+
+...
+
+dependencies {
+    ...
+
+    // rx java
+    implementation "io.reactivex.rxjava2:rxjava:2.2.2"
+    implementation "io.reactivex.rxjava2:rxandroid:2.1.0"
+
+    implementation "no.nordicsemi.android:dfu:1.7.0"
+    implementation "com.polidea.rxandroidble2:rxandroidble:1.7.0"
+    implementation 'com.jakewharton.rx2:replaying-share:2.0.1'
+
+    implementation(name: 'mawi-bluetooth', ext: 'aar')
+    ...
+}
+```
 
 ### 2. Permissions
 ```xml
