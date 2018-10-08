@@ -65,7 +65,7 @@ If you got this message:
 Failed to resolve: band.mawi.android:bluetooth:1.2.0
 ```
 
-You need to download [`mawi-bluetooth.aar`](https://github.com/mawiteam/Mawi_Bluetooth_Test_Proj/raw/master/app/libs/mawi-bluetooth.aar) and place this file in _libs_ folder of your _app_ module.
+You need to download `mawi-bluetooth.aar` and place this file in _libs_ folder of your _app_ module.
 Then add following lines to your application level `build.gradle`
 
 ```groovy
