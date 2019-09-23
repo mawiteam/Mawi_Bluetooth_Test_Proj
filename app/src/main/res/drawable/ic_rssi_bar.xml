@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<level-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:drawable="@drawable/ic_highlight_rssi_level_0"
+        android:maxLevel="10" />
+    <item
+        android:drawable="@drawable/ic_highlight_rssi_level_1"
+        android:maxLevel="28" />
+    <item
+        android:drawable="@drawable/ic_highlight_rssi_level_2"
+        android:maxLevel="45" />
+    <item
+        android:drawable="@drawable/ic_highlight_rssi_level_3"
+        android:maxLevel="100" />
+</level-list>

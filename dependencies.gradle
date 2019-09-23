@@ -1,30 +1,25 @@
 ext {
-
-    version_major = 1
+    version_major = 2
     version_minor = 0
     version_patch = 0
     version_name = "${version_major}.${version_minor}.${version_patch}"
 
-    version_code = 1001
+    version_code = 1002
     application_id = "com.example.test.project"
 
-    build_tools = '28.0.2'
-    min_sdk = 21
-    target_sdk = 26
+    build_tools = '28.0.3'
+    min_sdk = 22
+    target_sdk = 29
     compile_sdk = target_sdk
 
     support_version = '27.1.1'
-    rx_java_version = '2.2.2'
-    rx_android_version = '2.1.0'
-    kotlin_version = '1.2.51'
+    rx_java_version = '2.2.12'
+    rx_android_version = '2.1.1'
+    kotlin_version = '1.3.50'
     anko_version = '0.10.5'
+    dagger_version = '2.11'
     charting_version = 'v3.0.3'
     guava_version = '23.4-android'
-    gson_version = '2.8.2'
-    rx_ble_version = '1.7.0'
-    dfu_version = '1.7.0'
-
-    mawi_ble_version = '1.2.0'
 
     junit_version = '4.12'
 
@@ -32,19 +27,16 @@ ext {
     target_compat = JavaVersion.VERSION_1_8
 
     libs = [
-            kotlin              : "org.jetbrains.kotlin:kotlin-stdlib-jre7:$kotlin_version",
+            kotlin              : "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version",
             anko                : "org.jetbrains.anko:anko:$anko_version",
-            app_compat_v7       : "com.android.support:appcompat-v7:$support_version",
-            support_design      : "com.android.support:design:$support_version",
-            recycler_view       : "com.android.support:recyclerview-v7:$support_version",
+            app_compat_v7       : 'androidx.appcompat:appcompat:1.0.0',
+            support_design      : 'com.google.android.material:material:1.0.0',
+            recycler_view       : 'androidx.recyclerview:recyclerview:1.0.0',
             rx_java             : "io.reactivex.rxjava2:rxjava:$rx_java_version",
             rx_android          : "io.reactivex.rxjava2:rxandroid:$rx_android_version",
             charting            : "com.github.PhilJay:MPAndroidChart:$charting_version",
             guava               : "com.google.guava:guava:$guava_version",
-            gson                : "com.google.code.gson:gson:$gson_version",
-            mawi_bluetooth      : "band.mawi.android:bluetooth:$mawi_ble_version",
-            dfu_lib             : "no.nordicsemi.android:dfu:$dfu_version",
-            rx_ble              : "com.polidea.rxandroidble2:rxandroidble:$rx_ble_version",
+
             junit               : "junit:junit:$junit_version"
     ]
 }
