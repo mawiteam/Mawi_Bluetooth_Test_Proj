@@ -42,7 +42,7 @@ dependencies {
     implementation "io.reactivex.rxjava2:rxjava:2.2.2"
     implementation "io.reactivex.rxjava2:rxandroid:2.1.0"
 
-    implementation 'band.mawi.android:bluetooth:2.1.0'
+    implementation 'band.mawi.android:bluetooth:2.1.1'
     ...
 }
 ```
@@ -62,7 +62,7 @@ mawi.apikey=<YOUR_API_KEY>
 If you got this message:
 
 ```
-Failed to resolve: band.mawi.android:bluetooth:2.1.0
+Failed to resolve: band.mawi.android:bluetooth:2.1.1
 ```
 
 You need to download `mawi-bluetooth.aar` and place this file in _libs_ folder of your _app_ module.
@@ -211,7 +211,13 @@ When you need to disconnect from device use following snippet:
 client.disconnect()
 ```
 
-### 6. Handling `OperationResult<T>`
+### 6. Unpair
+When you need to unpair the device use following snippet. _NOTE:_ after calling the `unpair()` function, the disconnect is queued automatically.
+```kotlin
+client.unpair()
+```
+
+### 7. Handling `OperationResult<T>`
 For ease of use, the special `OperationResult<T>` class has been defined, which has child classes such as `Success` and `Failure`.
 
 There are some examples of handling results.
@@ -291,6 +297,47 @@ You can read and write band location.
 client.setBandLocation(Location.LEFT)
 ```
 
+
+### Notifications
+The device supports two types of notifications: Alarms and Reminders.
+
+You can set no more than 5 notifications for each type.
+
+If you set an empty array for alarms or reminders – it will be disabled.
+
+#### Alarms
+
+```kotlin
+val alarms = arrayOf<Alarm>(
+    ...
+)
+
+...
+
+client.setAlarms(alarms)
+```
+
+#### Reminders
+
+```kotlin
+val reminders = arrayOf<Reminder>(
+    ...
+)
+
+...
+
+client.setReminders(reminders)
+```
+
+### Clear data on the device
+If you want to clear all data on the device use following snippet. Note that this function deletes all data from the device.
+
+```kotlin
+client.clearData()
+    .subscribe {
+        // do stuff
+    }
+```
 
 ## Controllers
 
@@ -422,4 +469,4 @@ client.setBodyMetrics(bodyMetrics)
 
 ### Version 1.x
 
-The BLE library v 1.x is no longer supported. Please migrate to 2.x for bug fixing releases.k
+The BLE library v 1.x is no longer supported. Please migrate to 2.x for bug fixing releases.
